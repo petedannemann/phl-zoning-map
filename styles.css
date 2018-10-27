@@ -1,12 +1,27 @@
-body { 
-    margin:0; 
-    padding:0; 
+#application .site-header .page-title-container h1 {
+    font-size: 2.14286rem;
 }
-    
-#map { 
-    position: absolute; 
-    top:0; 
-    bottom:0; 
-    right:0; 
-    left:0; 
+
+html, body {
+    height: 100%;
+}
+
+header {
+    height: 75px;
+}
+
+footer {
+    height: 20px;
+}
+
+#map {
+    height: 100%;
+}
+
+.map-container {
+    position: fixed;
+    top: 75px;
+    bottom: 20px;
+    right: 0;
+    left: 0;
 }
