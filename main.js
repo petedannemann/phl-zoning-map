@@ -27,4 +27,20 @@ function initmap() {
                                 <p><b>Pending Bill</b>: <a href={PENDINGBILLURL}>{PENDINGBILL}</a></p>`, 
                                 layer.feature.properties);
     });
+
+    const arcgisOnline = L.esri.Geocoding.arcgisOnlineProvider();
+
+    const searchControl = L.esri.Geocoding.geosearch({
+        providers: [
+        arcgisOnline,
+        L.esri.Geocoding.featureLayerProvider({
+            url: url,
+            searchFields: ['OVERLAY_NAME', 'OVERLAY_SYMBOL'],
+            bufferRadius: 5000,
+            formatSuggestion: function(feature){
+            return feature.properties.OVERLAY_NAME + ' - ' + feature.properties.OVERLAY_SYMBOL;
+            }
+        })
+        ]
+    }).addTo(map);
 }
