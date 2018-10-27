@@ -1,1 +1,3 @@
 # City of Philadelphia Zoning Map
+
+This is a simple web application that displays zoning boundaries in the City of Philadelphia on a map. The user can search by zoning name, zoning symbol, or address and the map will zoom in on the result. The application consumes the GIS_PLANNING.Zoning_BaseDistricts Feature Service located [here](https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services/Zoning_BaseDistricts/FeatureServer/0/).
