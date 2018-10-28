@@ -1,27 +1,46 @@
+/* Title in header */
 #application .site-header .page-title-container h1 {
     font-size: 2.14286rem;
 }
 
+/* Needed to display map */
 html, body {
     height: 100%;
 }
 
+/* Specified header height to play well with map-container */
 header {
     height: 75px;
 }
 
+/* Specified footer height to play well with map-container */
 footer {
     height: 20px;
 }
 
+/* Leaflet maps need a specified height to appear */
 #map {
     height: 100%;
 }
 
+/* Container for the map */
 .map-container {
     position: fixed;
     top: 75px;
     bottom: 20px;
     right: 0;
     left: 0;
+}
+
+/* Legend */
+.legend {
+    line-height: 18px;
+    color: #555;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
 }
