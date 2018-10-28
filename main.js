@@ -1,10 +1,37 @@
 // Feature service url
 const url = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services/Zoning_BaseDistricts/FeatureServer/0';
 
+// Set up the map
+const map = L.map('map', {
+    center: [39.9526, -75.1652],
+    zoom: 13
+});
+
 // Create the feature layer and add it to the map
 let zoningOverlays = L.esri.featureLayer({
     url: url,
+    simplifyFactor: 0.70, // Simplify the feature to draw it faster
+    precision: 5,
     onEachFeature: onEachFeature
+}).addTo(map);
+
+let oldId;
+
+// Show Hover to Inspect when the mouse isn't on a feature
+zoningOverlays.on('mouseout', function(e){
+    document.getElementById('info-pane').innerHTML = 'Hover to Inspect';
+    zoningOverlays.resetFeatureStyle(oldId);
+});
+
+// Show the feature's Zoning Code when moused over
+zoningOverlays.on('mouseover', function(e){
+    oldId = e.layer.feature.id;
+    document.getElementById('info-pane').innerHTML = e.layer.feature.properties.CODE + ' - ' + e.layer.feature.properties.ZONINGGROUP;
+    zoningOverlays.setFeatureStyle(e.layer.feature.id, {
+        color: '#000000',
+        weight: 3,
+        opacity: 1
+    });
 });
 
 // Add descriptive popups
@@ -17,36 +44,10 @@ zoningOverlays.bindPopup((layer) => {
                             layer.feature.properties);
 });
 
-// Setup mapbox for basemaps
-let mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-		mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
-
-// Create the basemaps
-let grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
-    streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
-
-// Set up the map
-const map = L.map('map', {
-    center: [39.9526, -75.1652],
-    zoom: 13,
-    layers: [streets, zoningOverlays]
-});
-
-// Create a baselayer for the basemaps
-let baseLayers = {
-    "Streets": streets,
-    "Grayscale": grayscale
-};
-
-// Create an overlay for the zoning overlay
-let overlays = {
-    "Zoning Overlay": zoningOverlays
-};
-
-// Add the layers to the map
-L.control.layers(baseLayers, overlays).addTo(map);
+// Set up basemap
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 
 // Add ArcGIS Online Geocoding for searching
 const arcgisOnline = L.esri.Geocoding.arcgisOnlineProvider();
@@ -54,15 +55,15 @@ const arcgisOnline = L.esri.Geocoding.arcgisOnlineProvider();
 // Add searching by address and feature layer
 const searchControl = L.esri.Geocoding.geosearch({
     providers: [
-    arcgisOnline,
-    L.esri.Geocoding.featureLayerProvider({
-        url: url,
-        searchFields: ['CODE', 'ZONINGROUP', 'LONG_CODE'],
-        bufferRadius: 5000,
-        formatSuggestion: function(feature){
-        return feature.properties.CODE + ' - ' + feature.properties.ZONINGROUP + ' - ' + feature.properties.LONG_CODE;
-        }
-    })
+        arcgisOnline,
+        L.esri.Geocoding.featureLayerProvider({
+            url: url,
+            searchFields: ['CODE', 'ZONINGGROUP'],
+            bufferRadius: 5000,
+            formatSuggestion: function(feature){
+            return feature.properties.CODE + ' - ' + feature.properties.ZONINGGROUP;
+            }
+        })
     ]
 }).addTo(map);
 
