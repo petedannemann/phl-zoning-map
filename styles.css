@@ -40,7 +40,21 @@ footer {
     z-index: 400;
     padding: 1em;
     background: white;
+}
+
+/* Query drop down */
+#query {
+    position: absolute;
+    top: 70px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 1em;
   }
+
+#query select {
+font-size: 16px;
+}
 
 /* Legend */
 .legend {

@@ -76,7 +76,20 @@
 
     <div class="map-container">
         <div id="map"></div>
-        <div id="info-pane" class="leaflet-bar"></div>
+        <div id="info-pane" class="leaflet-bar">Hover to Inspect</div>
+        <div id="query" class="leaflet-bar">
+          <label>
+            Zoning Code
+            <select id="zoning-code">
+              <!-- Encase string values in single quotes for valid sql -->
+              <option value='1=1'>Any</option>
+              <!-- <option value="CODE='CA1'">CA1</option>
+              <option value="CODE='CA2'">CA2</option>
+              <option value="CODE='CMX1'">CMX1</option>
+              <option value="CODE='CMX2'">CMX2</option> -->
+            </select>
+          </label>
+        </div>
     </div>
 
   </main>
