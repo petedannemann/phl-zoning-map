@@ -18,88 +18,63 @@ let zoningOverlays = L.esri.featureLayer({
 // Store a reference to the selected zoning code
 let zoningSelection = document.getElementById('zoning-code');
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Add each zoning code as a select option
-    addZoningCodeOptions(url);
+// Add each zoning code as a select option
+addZoningCodeOptions();
 
-    // Update the zoningOverlays when an selection is made
-    zoningSelection.addEventListener('change', () => {
-        zoningOverlays.setWhere(zoningSelection.value);
+// Update the zoningOverlays when an selection is made
+zoningSelection.addEventListener('change', () => {
+    zoningOverlays.setWhere(zoningSelection.value);
+});
+
+// Show Hover to Inspect when the mouse isn't on a feature
+zoningOverlays.on('mouseout', (e) => {
+    document.getElementById('info-pane').innerHTML = 'Hover to Inspect';
+    zoningOverlays.resetFeatureStyle(oldId);
+});
+
+// Show the feature's Zoning Code when moused over
+zoningOverlays.on('mouseover', (e) => {
+    oldId = e.layer.feature.id;
+    document.getElementById('info-pane').innerHTML = e.layer.feature.properties.CODE + ' - ' + e.layer.feature.properties.ZONINGGROUP;
+    zoningOverlays.setFeatureStyle(e.layer.feature.id, {
+        color: '#000000',
+        weight: 3,
+        opacity: 1
     });
+});
 
-    // Show Hover to Inspect when the mouse isn't on a feature
-    zoningOverlays.on('mouseout', (e) => {
-        document.getElementById('info-pane').innerHTML = 'Hover to Inspect';
-        zoningOverlays.resetFeatureStyle(oldId);
-    });
+// Add descriptive popups
+zoningOverlays.bindPopup((layer) => {
+    return L.Util.template(`<h4><b>Code: {CODE}</b></h4><hr>
+                            <b>Zoning Group</b>: {ZONINGGROUP}<br>
+                            <b>Base District</b>: {LONG_CODE}<br>
+                            <b>Pending</b>: {PENDING}<br>
+                            <b>Pending Bill</b>: <a href={PENDINGBILLURL}>{PENDINGBILL}</a>`, 
+                            layer.feature.properties);
+});
 
-    // Show the feature's Zoning Code when moused over
-    zoningOverlays.on('mouseover', (e) => {
-        oldId = e.layer.feature.id;
-        document.getElementById('info-pane').innerHTML = e.layer.feature.properties.CODE + ' - ' + e.layer.feature.properties.ZONINGGROUP;
-        zoningOverlays.setFeatureStyle(e.layer.feature.id, {
-            color: '#000000',
-            weight: 3,
-            opacity: 1
-        });
-    });
+// Set up basemap
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
 
-    // Add descriptive popups
-    zoningOverlays.bindPopup((layer) => {
-        return L.Util.template(`<h4><b>Code: {CODE}</b></h4><hr>
-                                <b>Zoning Group</b>: {ZONINGGROUP}<br>
-                                <b>Base District</b>: {LONG_CODE}<br>
-                                <b>Pending</b>: {PENDING}<br>
-                                <b>Pending Bill</b>: <a href={PENDINGBILLURL}>{PENDINGBILL}</a>`, 
-                                layer.feature.properties);
-    });
+// Add ArcGIS Online Geocoding for searching
+const arcgisOnline = L.esri.Geocoding.arcgisOnlineProvider();
 
-    // Set up basemap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // Add ArcGIS Online Geocoding for searching
-    const arcgisOnline = L.esri.Geocoding.arcgisOnlineProvider();
-
-    // Add searching by address and feature layer
-    const searchControl = L.esri.Geocoding.geosearch({
-        providers: [
-            arcgisOnline,
-            L.esri.Geocoding.featureLayerProvider({
-                url: url,
-                searchFields: ['CODE', 'ZONINGGROUP'],
-                bufferRadius: 5000,
-                formatSuggestion: function(feature){
-                return feature.properties.CODE + ' - ' + feature.properties.ZONINGGROUP;
-                }
-            })
-        ]
-    }).addTo(map);
-
-    // Create a legend
-    let legend = L.control({position: 'bottomright'});
-
-    // Get the legend values and colors from the feature service
-    let legendValues = getLegendValues(url);
-
-    // Create the legend items
-    legend.onAdd = (map) => {
-
-        let div = L.DomUtil.create('div', 'info legend');
-
-        // Generate each legend label
-        legendValues.forEach((legendValue) => {
-            div.innerHTML +=
-                '<i style="background:blue' + '"></i> ' +
-                legendValues[i] + '<br>';
+// Add searching by address and feature layer
+const searchControl = L.esri.Geocoding.geosearch({
+    providers: [
+        arcgisOnline,
+        L.esri.Geocoding.featureLayerProvider({
+            url: url,
+            searchFields: ['CODE', 'ZONINGGROUP'],
+            bufferRadius: 5000,
+            formatSuggestion: function(feature){
+            return feature.properties.CODE + ' - ' + feature.properties.ZONINGGROUP;
+            }
         })
-        return div;
-    };
-
-    // Add the legend to the map
-    legend.addTo(map);
-})
+    ]
+}).addTo(map);
 
 // Highlight features when they are hovered with a mouse
 function highlightFeature(e) {
@@ -137,7 +112,7 @@ function onEachFeature(feature, layer) {
 }
 
 // Get all unique zoning codes from the feature service
-function addZoningCodeOptions(url) {
+function addZoningCodeOptions() {
     // Get the json formatted url
     const jsonUrl = url + '?f=json';
 
@@ -157,25 +132,4 @@ function addZoningCodeOptions(url) {
             zoningSelection.add(option);
         })
     });
-}
-
-// Get the legend values and colors from the feature service
-function getLegendValues(url) {
-    // Get the json formatted url
-    const jsonUrl = url + '?f=json';
-    
-    // Store legend values and colors in an object
-    let legendValues = [];
-
-    // Make a request to the feature service and get each unique color and value from the legend
-    fetch(jsonUrl)
-    .then(response => response.json())
-    .then(data => {
-        data.drawingInfo.renderer.uniqueValueInfos.forEach(legendValue => {
-            value = legendValue.value;
-            legendValues.push(value);
-        })
-    });
-
-    return legendValues;
 }
