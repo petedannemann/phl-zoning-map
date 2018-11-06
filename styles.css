@@ -1,6 +1,23 @@
-/* Title in header */
-#application .site-header .page-title-container h1 {
-    font-size: 2.14286rem;
+/* Center navbar text */
+.navbar-header, .navbar-footer {
+    float: left;
+    text-align: center;
+    width: 100%;
+}
+
+.navbar-footer {
+    padding-top: 15px;
+}
+
+.navbar-brand {
+    float: none;
+    font-size: 2em;
+    color: white;
+}
+
+/* Make navbar text white */
+.navbar-inverse .navbar-brand {
+    color: white;
 }
 
 /* Needed to display map */
@@ -11,11 +28,13 @@ html, body {
 /* Specified header height to play well with map-container */
 header {
     height: 75px;
+    text-align: center;
 }
 
 /* Specified footer height to play well with map-container */
 footer {
     height: 20px;
+    text-align: center;
 }
 
 /* Container for the map */
@@ -82,3 +101,4 @@ font-size: 16px;
         left: 0;
     }
 }
+
